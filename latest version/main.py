@@ -447,10 +447,24 @@ def item():
 
 @app.route('/coffee/12/purchase/me/pack', methods=['POST'])  # 购买，自然没有用
 def pack():
-    return jsonify({
-        "success": True
-    })
+    headers = request.headers
+    token = headers['Authorization']
+    token = token[7:]
 
+    pack_id = request.form['pack_id']
+
+    try:
+        user_id = server.auth.token_get_id(token)
+        if user_id is not None:
+            server.info.add_song_pack(user_id, pack_id)
+
+            return jsonify({
+                "success": True
+            })
+        else:
+            return error_return(108)
+    except:
+        return error_return(108)
 
 @app.route('/coffee/12/purchase/bundle/single', methods=['GET'])  # 单曲购买，自然没有用
 def single():
@@ -459,9 +473,9 @@ def single():
         "value": [{
             "name": "testsingle",
             "items": [{
-                    "id": "testsingle",
+                "id": "testsingle",
                 "type": "single",
-                        "is_available": False
+                "is_available": False
             }],
             "price": 100,
             "orig_price": 100
