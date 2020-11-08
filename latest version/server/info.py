@@ -57,24 +57,46 @@ def get_user_character(c, user_id):
             y = c.fetchone()
             if y is not None:
                 char_name = y[0]
-            s.append({
-                "is_uncapped_override": int2b(i[14]),
-                "is_uncapped": int2b(i[13]),
-                "uncap_cores": [],
-                "char_type": i[12],
-                "skill_id_uncap": i[11],
-                "skill_requires_uncap": int2b(i[10]),
-                "skill_unlock_level": i[9],
-                "skill_id": i[8],
-                "overdrive": i[7],
-                "prog": i[6],
-                "frag": i[5],
-                "level_exp": i[4],
-                "exp": i[3],
-                "level": i[2],
-                "name": char_name,
-                "character_id": i[1]
-            })
+            
+            if char_name == "Yume":
+                s.append({
+                    "is_uncapped_override": int2b(i[14]),
+                    "is_uncapped": int2b(i[13]),
+                    "uncap_cores": [],
+                    "char_type": i[12],
+                    "skill_id_uncap": i[11],
+                    "skill_requires_uncap": int2b(i[10]),
+                    "skill_unlock_level": i[9],
+                    "skill_id": i[8],
+                    "overdrive": i[7],
+                    "prog": i[6],
+                    "frag": i[5],
+                    "level_exp": i[4],
+                    "exp": i[3],
+                    "level": i[2],
+                    "name": char_name,
+                    "character_id": i[1],
+                    "voice": [0, 1, 2, 3, 100, 1000, 1001]
+                })
+            else:
+                s.append({
+                    "is_uncapped_override": int2b(i[14]),
+                    "is_uncapped": int2b(i[13]),
+                    "uncap_cores": [],
+                    "char_type": i[12],
+                    "skill_id_uncap": i[11],
+                    "skill_requires_uncap": int2b(i[10]),
+                    "skill_unlock_level": i[9],
+                    "skill_id": i[8],
+                    "overdrive": i[7],
+                    "prog": i[6],
+                    "frag": i[5],
+                    "level_exp": i[4],
+                    "exp": i[3],
+                    "level": i[2],
+                    "name": char_name,
+                    "character_id": i[1]
+                })
 
         return s
     else:
@@ -166,12 +188,11 @@ def get_value_0(c, user_id):
 def get_user_packs(c, user_id):
     # 返回用户的曲包持有信息 类型为列表
     c.execute('''SELECT pack_id FROM purchase WHERE user_id = :user_id''', {'user_id': user_id})
-    x = c.fetchone()
+    x = c.fetchall()
     r = []
-    
-    if x is not None:
-        for p in x:
-            r.append(p)
+
+    for p in x:
+        r.append(p[0])
 
     return r
 
@@ -191,6 +212,7 @@ def get_song_pack_infos():
     # 返回 songpacks.json 曲包信息 类型为列表
     with open('./database/songpacks.json') as f:
         obj = json.loads(f.read())
+        f.close()
     
     r = []
     for pack in obj['packs']:
