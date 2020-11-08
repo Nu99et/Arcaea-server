@@ -173,7 +173,7 @@ def get_value_0(c, user_id):
              "stamina": 12,
              "world_unlocks": [],
              "world_songs": ["babaroque", "shadesoflight", "kanagawa", "lucifer", "anokumene", "ignotus", "rabbitintheblackroom", "qualia", "redandblue", "bookmaker", "darakunosono", "espebranch", "blacklotus", "givemeanightmare", "vividtheory", "onefr", "gekka", "vexaria3", "infinityheaven3", "fairytale3", "goodtek3", "suomi", "rugie", "faintlight", "harutopia", "goodtek", "dreaminattraction", "syro", "diode", "freefall", "grimheart", "blaster", "cyberneciacatharsis", "monochromeprincess", "revixy", "vector", "supernova", "nhelv", "purgatorium3", "dement3", "crossover", "guardina", "axiumcrisis", "worldvanquisher", "sheriruth", "pragmatism", "gloryroad", "etherstrike", "corpssansorganes", "lostdesire", "blrink", "essenceoftwilight", "lapis"],
-             "singles": ["dataerror", "yourvoiceso", "crosssoul", "impurebird", "auxesia", "modelista", "yozakurafubuki", "surrender", "metallicpunisher", "carminescythe", "bethere", "callmyname", "fallensquare", "dropdead", "alexandrite", "astraltale", "phantasia", "empireofwinter", "libertas", "dottodot", "dreadnought", "mirzam", "heavenlycaress", "filament", "avantraze", "battlenoone", "saikyostronger", "izana", "einherjar", "laqryma", "amygdata", "altale", "feelssoright", "scarletcage", "teriqma", "mahoroba", "badtek", "maliciousmischance", "buchigireberserker", "galaxyfriends", "buchigireberserker2", "xeraphinite"],
+             "singles": get_user_singles(c, user_id), # ["dataerror", "yourvoiceso", "crosssoul", "impurebird", "auxesia", "modelista", "yozakurafubuki", "surrender", "metallicpunisher", "carminescythe", "bethere", "callmyname", "fallensquare", "dropdead", "alexandrite", "astraltale", "phantasia", "empireofwinter", "libertas", "dottodot", "dreadnought", "mirzam", "heavenlycaress", "filament", "avantraze", "battlenoone", "saikyostronger", "izana", "einherjar", "laqryma", "amygdata", "altale", "feelssoright", "scarletcage", "teriqma", "mahoroba", "badtek", "maliciousmischance", "buchigireberserker", "galaxyfriends", "buchigireberserker2", "xeraphinite"],
              "packs": get_user_packs(c, user_id), # ["vs", "extend", "dynamix", "prelude", "core", "yugamu", "omatsuri", "zettai", "mirai", "shiawase", "chunithm", "nijuusei", "groovecoaster", "rei", "tonesphere" ,"lanota"],
              "characters": characters,
              "cores": [],
@@ -184,6 +184,17 @@ def get_value_0(c, user_id):
              }
 
     return r
+
+def get_user_singles(c, user_id):
+    # 返回用户的单曲持有信息 类型为列表
+    c.execute('''SELECT single_id FROM purchase_single WHERE user_id = :user_id''', {'user_id': user_id})
+    x = c.fetchall()
+    r = []
+
+    for p in x:
+        r.append(p[0])
+
+    return r    
 
 def get_user_packs(c, user_id):
     # 返回用户的曲包持有信息 类型为列表
@@ -196,6 +207,17 @@ def get_user_packs(c, user_id):
 
     return r
 
+def add_single(user_id, single_id):
+    # 为用户添加单曲
+    conn = sqlite3.connect('./database/arcaea_database.db')
+    c = conn.cursor()
+
+    c.execute('''INSERT INTO purchase_single VALUES (:user_id, :single_id)''', {'user_id': user_id, 'single_id': single_id})
+    conn.commit()
+    conn.close()
+    
+    return
+
 def add_song_pack(user_id, pack_id):
     # 为用户添加曲包
     conn = sqlite3.connect('./database/arcaea_database.db')
@@ -205,7 +227,7 @@ def add_song_pack(user_id, pack_id):
     conn.commit()
     conn.close()
 
-    return 
+    return
 
 
 def get_song_pack_infos():
@@ -217,7 +239,7 @@ def get_song_pack_infos():
     r = []
     for pack in obj['packs']:
         p = {
-            "name": pack['id'],
+            "name": pack['name'],
             "items": [],
             "price": pack['price'],
             "orig_price": pack['orig_price'],
@@ -231,10 +253,40 @@ def get_song_pack_infos():
             p['items'].append({
                 "id": item['id'],
                 "type": item['type'],
-                "is_available": item['available']
+                "is_available": item['is_available']
             })
         
         r.append(p)
+    
+    return r
+
+def get_single_infos():
+    # 返回 singles.json 单曲信息 类型为列表
+    with open('./database/singles.json') as f:
+        obj = json.loads(f.read())
+        f.close()
+    
+    r = []
+    for single in obj['singles']:
+        s = {
+            "name": single['name'],
+            "items": [],
+            "price": single['price'],
+            "orig_price": single['orig_price']
+        }
+
+        if 'discount_from' in single and 'discount_to' in single:
+            s['discount_from'] = single['discount_from']
+            s['discount_to'] = single['discount_to']
+
+        for item in single['items']:
+            s['items'].append({
+                "id": item['id'],
+                "type": item['type'],
+                "is_available": item['is_available']
+            })
+        
+        r.append(s)
     
     return r
 
