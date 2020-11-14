@@ -456,6 +456,8 @@ def pack():
             user_id = server.auth.token_get_id(token)
             if user_id is not None:
                 server.info.add_song_pack(user_id, request.form['pack_id'])
+                r = server.info.get_song_pack_info_by_id(request.form['pack_id'])
+                server.info.take_memories(user_id, r['price'])
                 return jsonify({
                     "success": True
                 })
@@ -465,6 +467,8 @@ def pack():
             user_id = server.auth.token_get_id(token)
             if user_id is not None:
                 server.info.add_single(user_id, request.form['single_id'])
+                r = server.info.get_single_info_by_id(request.form['single_id'])
+                server.info.take_memories(user_id, r['price'])
                 return jsonify({
                     "success": True
                 })

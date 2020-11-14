@@ -162,7 +162,7 @@ def get_value_0(c, user_id):
              "name": x[1],
              "user_code": x[4],
              "display_name": x[1],
-             "ticket": 114514,
+             "ticket": x[26],
              "character": x[6],
              "is_locked_name_duplicate": False,
              "is_skill_sealed": int2b(x[7]),
@@ -184,6 +184,19 @@ def get_value_0(c, user_id):
              }
 
     return r
+
+def take_memories(user_id, price):
+    conn = sqlite3.connect('./database/arcaea_database.db')
+    c = conn.cursor()
+
+    c.execute('''SELECT memories FROM user WHERE user_id = :user_id''', {'user_id': user_id})
+    orig_mmrs = c.fetchone()[0]
+
+    c.execute('UPDATE user SET memories = {0} WHERE user_id = :user_id'.format(str(orig_mmrs - price)), {'user_id': user_id})
+    conn.commit()
+    conn.close()
+
+    return
 
 def get_user_singles(c, user_id):
     # 返回用户的单曲持有信息 类型为列表
@@ -229,6 +242,31 @@ def add_song_pack(user_id, pack_id):
 
     return
 
+def get_song_pack_info_by_id(pack_id):
+    with open('./database/songpacks.json') as f:
+        obj = json.loads(f.read())
+        f.close()
+    
+    r = {}
+    for pack in obj['packs']:
+        if pack['name'] == pack_id:
+            r = pack
+            break
+
+    return r
+
+def get_single_info_by_id(single_id):
+    with open('./database/singles.json') as f:
+        obj = json.loads(f.read())
+        f.close()
+    
+    r = {}
+    for single in obj['singles']:
+        if single['name'] == single_id:
+            r = single
+            break
+    
+    return r
 
 def get_song_pack_infos():
     # 返回 songpacks.json 曲包信息 类型为列表

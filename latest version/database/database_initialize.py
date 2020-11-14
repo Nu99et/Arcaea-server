@@ -31,7 +31,8 @@ clear_type int,
 rating real,
 favorite_character int,
 max_stamina_notification_enabled int,
-current_map text
+current_map text,
+memories int
 );''')
 c.execute('''create table if not exists login(access_token text,
 user_id int,
@@ -169,6 +170,12 @@ stamina_multiply int,
 fragment_multiply int,
 prog_boost_multiply int,
 primary key(user_id, song_id, difficulty)
+);''')
+c.execute('''create table if not exists purchase(user_id varchar,
+pack_id varchar
+);''')
+c.execute('''create table if not exists purchase_single(user_id varchar,
+single_id varchar
 );''')
 
 char = ['Hikari','Tairitsu','Kou','Sapphire','Lethe','','Tairitsu(Axium)'
